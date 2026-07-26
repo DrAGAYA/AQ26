@@ -1,2 +1,10 @@
 source: .
 destination: _site
+theme: null
+sass:
+  skip_defaults: true
+exclude:
+  - node_modules
+  - "*.md"
+  - .gitignore
+  - README.md
