@@ -1,106 +1,310 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AQ26 - Next Med Tech Tools</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 50px;
-            max-width: 600px;
-            text-align: center;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-        }
-        
-        .subtitle {
-            color: #666;
-            font-size: 1.1em;
-            margin-bottom: 30px;
-        }
-        
-        .description {
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            font-size: 1em;
-        }
-        
-        .button {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        .footer {
-            margin-top: 40px;
-            color: #999;
-            font-size: 0.9em;
-        }
-        
-        .github-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        .github-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expert Émilie - Votre Assistant Santé</title>
+
+  <style>
+    :root{
+      --primary:#4A90E2;
+      --secondary:#5856D6;
+      --bg:#F0F4F8;
+      --white:#fff;
+      --text:#2C3E50;
+      --airtel:#E31837;
+      --radius:14px;
+      --button-height:52px;
+      --touch-gap:12px;
+      --max-width:640px;
+    }
+
+    /* Base, mobile-first */
+    html,body{height:100%; margin:0; font-family: system-ui,-apple-system, "Roboto", "Helvetica", "Arial", sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+    .wrap{box-sizing:border-box; padding:18px; max-width:var(--max-width); margin:0 auto; width:100%;}
+    .card{background:var(--white); padding:20px; border-radius:var(--radius); box-shadow:0 8px 20px rgba(0,0,0,0.06); margin-bottom:18px;}
+    h1{font-size:1.6rem; margin:0; color:var(--primary); text-align:center;}
+    h2{font-size:1.125rem; color:var(--primary); margin:10px 0;}
+    h3{font-size:1rem; margin:0 0 8px 0; color:var(--primary);}
+
+    /* Header / progress */
+    .header{position:sticky; top:0; background:var(--bg); padding:10px 0; z-index:50; display:none;}
+    .progress-text{font-size:0.9rem; color:var(--primary); text-align:right; margin-bottom:6px;}
+    .progress-bar-bg{width:100%; height:10px; background:#e6edf5; border-radius:999px; overflow:hidden;}
+    #progress-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--primary),var(--secondary)); transition:width .35s ease;}
+
+    .time-notice{background:#eef5ff; border-left:4px solid var(--secondary); padding:12px; border-radius:0 12px 12px 0; margin:12px 0; font-size:0.9rem;}
+
+    /* Inputs */
+    label{display:block; font-size:0.9rem; margin-bottom:6px;}
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea{
+      width:100%; padding:12px; border-radius:10px; border:1.5px solid #eee; box-sizing:border-box; font-size:1rem;
+    }
+    input:focus, textarea:focus{outline:3px solid rgba(74,144,226,0.15); border-color:var(--primary);}
+
+    /* Service list */
+    .service-option{border:1.5px solid #eee; border-radius:12px; padding:14px; margin:10px 0; background:#fafafa; display:flex; flex-direction:column; gap:6px; cursor:pointer; transition:transform .08s, box-shadow .12s;}
+    .service-option.selected{border-color:var(--secondary); background:#f6f5ff; box-shadow:0 6px 18px rgba(88,86,214,0.08); transform:translateY(-2px);}
+    .service-title{font-weight:700;}
+    .service-price{color:var(--secondary); font-weight:700; font-size:1.05rem;}
+
+    /* Options (radio) */
+    .option{display:flex; align-items:center; gap:12px; padding:12px; border-radius:12px; border:1.25px solid #f0f0f0; background:#fff; cursor:pointer; margin:8px 0;}
+    .option input[type="radio"]{width:20px; height:20px;}
+    .option:active{transform:scale(.995);}
+
+    /* Buttons */
+    .btn-group{display:flex; gap:10px; margin-top:12px;}
+    button{height:var(--button-height); border-radius:12px; border:none; cursor:pointer; font-weight:700; font-size:1rem; padding:0 14px;}
+    .next-btn{background:var(--primary); color:white; box-shadow:0 6px 16px rgba(74,144,226,0.16); min-width:120px;}
+    .prev-btn{background:#d1d9e0; color:#233; min-width:100px;}
+    .airtel-btn{background:var(--airtel); color:white; box-shadow:0 6px 16px rgba(227,24,55,0.16); width:100%;}
+
+    /* Tooltip / info */
+    .question-header{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+    .info-btn{width:34px; height:34px; border-radius:50%; background:#eaf2ff; color:var(--primary); border:none; font-weight:700; cursor:pointer;}
+    .tooltip-box{display:none; background:#f4f8fe; border-left:4px solid var(--primary); padding:10px; border-radius:6px; margin-top:8px; color:#444; font-size:0.95rem;}
+    .tooltip-box.show{display:block;}
+
+    /* Responsive: wider screens */
+    @media (min-width:720px){
+      .wrap{padding:24px;}
+      .card{padding:26px;}
+      h1{font-size:2rem;}
+    }
+
+    /* Ensure focused step title is visible for keyboard users */
+    .step:focus{outline: none;}
+    .hidden{display:none !important;}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🏥 AQ26</h1>
-        <p class="subtitle">Next Med Tech Tools</p>
-        
-        <p class="description">
-            Bienvenue sur AQ26, votre plateforme d'outils technologiques pour le secteur médical. 
-            Nous fournissons des solutions innovantes et fiables.
-        </p>
-        
-        <a href="https://github.com/DrAGAYA/AQ26" class="button">📂 Voir sur GitHub</a>
-        
-        <div class="footer">
-            <p>Créé par <a href="https://github.com/DrAGAYA" class="github-link">DrAGAYA</a></p>
-            <p>© 2026 - Tous droits réservés</p>
-        </div>
+  <div class="wrap">
+    <!-- Header (progress) -->
+    <div id="mainHeader" class="header" aria-hidden="true">
+      <div class="progress-text">Question <span id="current-num" aria-live="polite">1</span> / 10</div>
+      <div class="progress-bar-bg" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="progressLabel">
+        <div id="progress-fill" aria-hidden="true"></div>
+      </div>
     </div>
-</body>
-</html>
+
+    <form id="quizForm" action="https://formspree.io/f/xeelgapy" method="POST" novalidate>
+      <!-- STEP 0: welcome -->
+      <section class="card step active" id="step0" data-step="0" tabindex="-1" aria-labelledby="welcomeTitle">
+        <h1 id="welcomeTitle">👁️ Expert Émilie</h1>
+        <p>Bienvenue sur votre assistant digital de santé visuelle et globale. Commençons par faire connaissance.</p>
+
+        <label for="name">Nom complet</label>
+        <input id="name" name="Nom_Utilisateur" type="text" autocomplete="name" required>
+
+        <label for="email">Adresse email</label>
+        <input id="email" name="_replyto" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required>
+
+        <div style="margin-top:12px;">
+          <button type="button" class="next-btn" data-target="catalogue">Découvrir les Services</button>
+        </div>
+      </section>
+
+      <!-- CATALOGUE -->
+      <section class="card step" id="stepCatalogue" data-step="catalogue" tabindex="-1" aria-labelledby="catalogueTitle">
+        <h2 id="catalogueTitle">Choisissez votre formule</h2>
+        <p>Sélectionnez le niveau d'accompagnement dont vous avez besoin aujourd'hui :</p>
+
+        <input type="hidden" name="Service_Choisi" id="selectedServiceInput" value="Routine">
+        <input type="hidden" name="Prix_Service" id="selectedPriceInput" value="2000 FCFA">
+
+        <div id="services">
+          <div class="service-option selected" data-id="srv1" data-name="Routine" data-price="2000 FCFA" tabindex="0" role="button" aria-pressed="true">
+            <div class="service-title">Formule Routine</div>
+            <div style="font-size:0.92rem; color:#5a5a5a;">Bilan de base rapide et automatisé.</div>
+            <div class="service-price">2 000 FCFA</div>
+          </div>
+
+          <div class="service-option" data-id="srv2" data-name="Analyse et Infographies" data-price="3000 FCFA" tabindex="0" role="button" aria-pressed="false">
+            <div class="service-title">Analyse & Infographies</div>
+            <div style="font-size:0.92rem; color:#5a5a5a;">Rapport visuel détaillé de vos symptômes.</div>
+            <div class="service-price">3 000 FCFA</div>
+          </div>
+
+          <div class="service-option" data-id="srv3" data-name="PDF et téléconseil vidéo" data-price="7000 FCFA" tabindex="0" role="button" aria-pressed="false">
+            <div class="service-title">PDF & Téléconseil Vidéo</div>
+            <div style="font-size:0.92rem; color:#5a5a5a;">Bilan complet téléchargeable + appel vidéo conseil.</div>
+            <div class="service-price">7 000 FCFA</div>
+          </div>
+        </div>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="0">Retour</button>
+          <button type="button" class="next-btn" data-target="1">Accéder au Test</button>
+        </div>
+      </section>
+
+      <!-- Questions (1..10) -->
+      <!-- QUESTION 1 -->
+      <section class="card step" id="step1" data-step="1" tabindex="-1" aria-labelledby="q1Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q1Title">
+          <h3>1. Douleur des Yeux</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip1" data-tip="1">i</button>
+        </div>
+        <div class="tooltip-box" id="tip1" role="region" aria-hidden="true">« Une douleur oculaire peut traduire une simple fatigue, mais aussi une inflammation. Nous sommes là pour faire le point en douceur avec vous. »</div>
+
+        <fieldset aria-labelledby="q1Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Douleur des Yeux</legend>
+          <div role="radiogroup" aria-labelledby="q1Title">
+            <label class="option"><input type="radio" name="Douleur_Yeux" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Douleur_Yeux" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Douleur_Yeux" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Douleur_Yeux" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="catalogue">Retour</button>
+          <button type="button" class="next-btn" data-target="2">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 2 -->
+      <section class="card step" id="step2" data-step="2" tabindex="-1" aria-labelledby="q2Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q2Title">
+          <h3>2. Vision floue</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip2" data-tip="2">i</button>
+        </div>
+        <div class="tooltip-box" id="tip2" role="region" aria-hidden="true">« Une baisse de netteté peut survenir avec la fatigue ou un besoin de correction. Ne vous inquiétez pas, décrivez-nous ce que vous ressentez. »</div>
+
+        <fieldset aria-labelledby="q2Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Vision floue</legend>
+          <div role="radiogroup" aria-labelledby="q2Title">
+            <label class="option"><input type="radio" name="Vision_Floue" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Vision_Floue" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Vision_Floue" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Vision_Floue" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="1">Retour</button>
+          <button type="button" class="next-btn" data-target="3">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 3 -->
+      <section class="card step" id="step3" data-step="3" tabindex="-1" aria-labelledby="q3Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q3Title">
+          <h3>3. Démangeaisons oculaires</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip3" data-tip="3">i</button>
+        </div>
+        <div class="tooltip-box" id="tip3" role="region" aria-hidden="true">« Souvent liées à des allergies ou à une sécheresse de l'œil, les démangeaisons sont inconfortables mais fréquentes. Identifions-en la cause. »</div>
+
+        <fieldset aria-labelledby="q3Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Démangeaisons oculaires</legend>
+          <div role="radiogroup" aria-labelledby="q3Title">
+            <label class="option"><input type="radio" name="Demangeaisons" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Demangeaisons" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Demangeaisons" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Demangeaisons" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="2">Retour</button>
+          <button type="button" class="next-btn" data-target="4">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 4 -->
+      <section class="card step" id="step4" data-step="4" tabindex="-1" aria-labelledby="q4Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q4Title">
+          <h3>4. Gonflement des paupières</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip4" data-tip="4">i</button>
+        </div>
+        <div class="tooltip-box" id="tip4" role="region" aria-hidden="true">« Un gonflement peut être le signe d'une petite réaction locale ou d'un manque de repos. Regardons cela de plus près pour vous soulager. »</div>
+
+        <fieldset aria-labelledby="q4Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Gonflement des paupières</legend>
+          <div role="radiogroup" aria-labelledby="q4Title">
+            <label class="option"><input type="radio" name="Gonflement" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Gonflement" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Gonflement" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Gonflement" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="3">Retour</button>
+          <button type="button" class="next-btn" data-target="5">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 5 -->
+      <section class="card step" id="step5" data-step="5" tabindex="-1" aria-labelledby="q5Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q5Title">
+          <h3>5. Difficultés à lire les petites écritures</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip5" data-tip="5">i</button>
+        </div>
+        <div class="tooltip-box" id="tip5" role="region" aria-hidden="true">« C'est un signe très courant d'évolution naturelle de la vue (comme la presbytie). C'est une étape normale, voyons comment vous accompagner. »</div>
+
+        <fieldset aria-labelledby="q5Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Lecture petites écritures</legend>
+          <div role="radiogroup" aria-labelledby="q5Title">
+            <label class="option"><input type="radio" name="Lecture_Petite" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Lecture_Petite" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Lecture_Petite" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Lecture_Petite" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="4">Retour</button>
+          <button type="button" class="next-btn" data-target="6">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 6 -->
+      <section class="card step" id="step6" data-step="6" tabindex="-1" aria-labelledby="q6Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q6Title">
+          <h3>6. Gêne par éblouissement au soleil</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip6" data-tip="6">i</button>
+        </div>
+        <div class="tooltip-box" id="tip6" role="region" aria-hidden="true">« Une sensibilité accrue à la lumière peut révéler une fragilité passagère ou le besoin d'une protection adaptée. Protégeons vos yeux intelligemment. »</div>
+
+        <fieldset aria-labelledby="q6Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Éblouissement</legend>
+          <div role="radiogroup" aria-labelledby="q6Title">
+            <label class="option"><input type="radio" name="Eblouissement" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Eblouissement" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Eblouissement" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Eblouissement" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fieldset>
+
+        <div class="btn-group" style="margin-top:14px;">
+          <button type="button" class="prev-btn" data-target="5">Retour</button>
+          <button type="button" class="next-btn" data-target="7">Suivant</button>
+        </div>
+      </section>
+
+      <!-- QUESTION 7 -->
+      <section class="card step" id="step7" data-step="7" tabindex="-1" aria-labelledby="q7Title">
+        <div class="time-notice">Au cours des 3 derniers mois...</div>
+        <div class="question-header" id="q7Title">
+          <h3>7. Vertiges</h3>
+          <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip7" data-tip="7">i</button>
+        </div>
+        <div class="tooltip-box" id="tip7" role="region" aria-hidden="true">« Un trouble de la vue ou une fatigue visuelle importante peuvent parfois perturber votre équilibre. Votre bien-être global est notre priorité. »</div>
+
+        <fieldset aria-labelledby="q7Title" style="margin-top:10px; border:none; padding:0;">
+          <legend class="hidden">Vertiges</legend>
+          <div role="radiogroup" aria-labelledby="q7Title">
+            <label class="option"><input type="radio" name="Vertiges" value="Jamais" required> <span>Jamais</span></label>
+            <label class="option"><input type="radio" name="Vertiges" value="Parfois"> <span>Parfois</span></label>
+            <label class="option"><input type="radio" name="Vertiges" value="Souvent"> <span>Souvent</span></label>
+            <label class="option"><input type="radio" name="Vertiges" value="Très Souvent"> <span>Très Souvent</span></label>
+          </div>
+        </fi...
