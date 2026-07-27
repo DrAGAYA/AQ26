@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YENA EXPERT- Votre Assistant Santé Visuelle</title>
+    <!-- Script Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #5856D6;
+            --bg: #F0F4F8;
+            --white: #ffffff;
+            --text: #2C3E50;
+            --airtel: #E31837;
+            --moov: #0056b3;
+            --success: #27AE60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 450px; margin: 0 auto; }
+
+        /* Barre de progression */
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #d1d9e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-align: right;
+        }
+
+        /* Notice de temps */
+        .time-notice {
+            background: #eef5ff;
+            border-left: 4px solid var(--secondary);
+            padding: 12px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Cartes d'affichage */
+        .step { display: none; animation: slideUp 0.4s ease-out; }
+        .step.active { display: block; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--white);
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        h2 { color: var(--primary); margin-top: 0; text-align: center; }
+        h3 { margin-top: 0; line-height: 1.4; font-size: 1.2rem; color: var(--primary); }
+
+        /* Inputs */
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        /* Services */
+        .service-option {
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: 0.3s;
+            background: #fafafa;
+        }
+        .service-option.selected {
+            border-color: var(--secondary);
+            background: #f6f5ff;
+            box-shadow: 0 4px 12px rgba(88, 86, 214, 0.15);
+        }
+        .service-title { font-weight: bold; font-size: 1.1rem; color: var(--text); }
+        .service-price { color: var(--secondary); font-weight: bold; font-size: 1.2rem; margin-top: 5px; }
+
+        /* Options Radio */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .option:hover { background: #f8f9fa; }
+        .option:active { transform: scale(0.98); }
+        input[type="radio"] { width: 20px; height: 20px; margin-right: 12px; cursor: pointer; }
+
+        /* Jauge Bleue */
+        .profile-card-teaser {
+            background: linear-gradient(135deg, #4A90E2 0%, #5856D6 100%);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 25px rgba(88, 86, 214, 0.25);
+        }
+        .profile-card-teaser h3 { color: white; margin: 0 0 10px 0; font-size: 1.2rem; }
+        
+        .gauge-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 10px auto;
+        }
+        .gauge-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0deg, #e0e0e0 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 1s ease-in-out;
+        }
+        .gauge-inner {
+            width: 105px;
+            height: 105px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .gauge-value { font-size: 2.2rem; font-weight: bold; color: var(--primary); }
+        .gauge-label { font-size: 0.75rem; color: #888; font-weight: bold; }
+
+        /* Grille Teaser Dashboard */
+        .teaser-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .teaser-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .teaser-title {
+            font-size: 0.82rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .teaser-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 6px;
+            line-height: 1.35;
+        }
+        .lock-badge {
+            font-size: 0.7rem;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: normal;
+        }
+
+        /* Banner d'incitation */
+        .callout-banner {
+            background: #eef5ff;
+            border-left: 4px solid var(--primary);
+            padding: 12px 15px;
+            border-radius: 0 12px 12px 0;
+            margin-top: 15px;
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* Boutons d'aide */
+        .question-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: #e8f0fe;
+            color: var(--primary);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tooltip-box {
+            display: none;
+            background-color: #f4f8fe;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            border-radius: 4px 12px 12px 4px;
+            font-size: 0.88rem;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+        .tooltip-box.show { display: block; }
+
+        /* Opérateurs Paiement */
+        .operator-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .operator-card {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .operator-card.airtel-card { color: var(--airtel); }
+        .operator-card.airtel-card.selected { border-color: var(--airtel); background: rgba(227, 24, 55, 0.08); }
+        .operator-card.moov-card { color: var(--moov); }
+        .operator-card.moov-card.selected { border-color: var(--moov); background: rgba(0, 86, 179, 0.08); }
+
+        /* Boutons */
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .next-btn { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(74,144,226,0.3); }
+        .prev-btn { background: #d1d9e0; color: #555; }
+        .pay-btn { background: #6c757d; color: white; width: 100%; cursor: not-allowed; }
+        .pay-btn.active.airtel-theme { background: var(--airtel); cursor: pointer; box-shadow: 0 4px 12px rgba(227,24,55,0.3); }
+        .pay-btn.active.moov-theme { background: var(--moov); cursor: pointer; box-shadow: 0 4px 12px rgba(0,86,179,0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Barre de progression -->
+    <div class="header" id="mainHeader">
+        <div class="progress-text">Question <span id="current-num">1</span> / 10</div>
+        <div class="progress-bar-bg"><div id="progress-fill"></div></div>
+    </div>
+
+    <form id="quizForm" action="https://formspree.io/f/xeelgapy" method="POST">
+
+        <!-- ÉTAPE 0 : Accueil -->
+        <div class="step active" id="step0">
+            <div class="card" style="text-align: center;">
+                <h1 style="font-size: 3rem; margin: 0;">👁️</h1>
+                <h2>Expert Émilie</h2>
+                <p>Bienvenue sur votre assistant digital de santé visuelle et globale. Commençons par faire connaissance.</p>
+                <input type="text" id="inputName" name="Nom_Utilisateur" placeholder="Votre Nom complet" required>
+                <input type="email" id="inputEmail" name="_replyto" placeholder="Votre Adresse Email" required>
+            </div>
+            <button type="button" class="next-btn" style="width: 100%;" onclick="validateStep0()">Découvrir les Services</button>
+        </div>
+
+        <!-- ÉTAPE CATALOGUE -->
+        <div class="step" id="stepCatalogue">
+            <div class="time-notice">Évaluez vos symptômes ressentis sur les 3 derniers mois.</div>
+            <div class="card">
+                <h3>Choisissez votre formule</h3>
+                <p style="font-size: 0.9rem; color: #666;">Sélectionnez le niveau d'accompagnement souhaité :</p>
+
+                <input type="hidden" name="Service_Choisi" id="selectedServiceInput" value="Routine">
+                <input type="hidden" name="Prix_Service" id="selectedPriceInput" value="2000 FCFA">
+
+                <div class="service-option selected" id="srv1" onclick="selectService('srv1', 'Routine', '2000 FCFA')">
+                    <div class="service-title">Formule Routine</div>
+                    <p style="margin: 5px 0 0 0; font-size:0.85rem; color:#555;">Bilan de base rapide et automatisé.</p>
+                    <div class="service-price">2 000 FCFA</div>
+                </div>
+
+                <div class="service-option" id="srv2" onclick="selectService('srv2', 'Analyse et Infographies', '3000 FCFA')">
+                    <div class="service-title">Analyse & Infographies</div>
+                    <p style="margin: 5px 0 0 0; font-size:0.85rem; color:#555;">Rapport visuel détaillé de vos symptômes.</p>
+                    <div class="service-price">3 000 FCFA</div>
+                </div>
+
+                <div class="service-option" id="srv3" onclick="selectService('srv3', 'PDF et téléconseil vidéo', '7000 FCFA')">
+                    <div class="service-title">PDF & Téléconseil Vidéo</div>
+                    <p style="margin: 5px 0 0 0; font-size:0.85rem; color:#555;">Bilan complet + entretien de conseil vidéo.</p>
+                    <div class="service-price">7 000 FCFA</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="prev-btn" onclick="goStep(0)">Retour</button>
+                <button type="button" class="next-btn" onclick="goStep(1)">Accéder au Test</button>
+            </div>
+        </div>
+
+        <!-- QUESTION 1 -->
+        <div class="step" id="step1">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>1. Douleur des Yeux</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(1)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip1">Une douleur oculaire peut traduire une simple fatigue visuelle ou une inflammation.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Douleur_Yeux" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Douleur_Yeux" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Douleur_Yeux" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Douleur_Yeux" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep('catalogue')">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(1, 2)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 2 -->
+        <div class="step" id="step2">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>2. Vision floue</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(2)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip2">Une baisse de netteté peut survenir avec la fatigue ou indiquer un besoin de correction.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Vision_Floue" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Vision_Floue" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Vision_Floue" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Vision_Floue" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(1)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(2, 3)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 3 -->
+        <div class="step" id="step3">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>3. Démangeaisons oculaires</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(3)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip3">Souvent liées à des allergies ou à la sécheresse oculaire en environnement climatisé.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Demangeaisons" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Demangeaisons" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Demangeaisons" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Demangeaisons" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(2)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(3, 4)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 4 -->
+        <div class="step" id="step4">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>4. Gonflement des paupières</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(4)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip4">Signe d'une réaction allergique, d'une infection locale ou de fatigue accumulée.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Gonflement" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Gonflement" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Gonflement" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Gonflement" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(3)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(4, 5)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 5 -->
+        <div class="step" id="step5">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>5. Difficultés à lire de près</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(5)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip5">Difficulté à lire les petites écritures sur téléphone. Indice classique de presbytie.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Lecture_Petite" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Lecture_Petite" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Lecture_Petite" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Lecture_Petite" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(4)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(5, 6)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 6 -->
+        <div class="step" id="step6">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>6. Éblouissement au soleil</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(6)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip6">Une sensibilité forte à la lumière vive nécessite une protection solaire adaptée.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Eblouissement" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Eblouissement" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Eblouissement" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Eblouissement" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(5)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(6, 7)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 7 -->
+        <div class="step" id="step7">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>7. Vertiges & Perturbations</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(7)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip7">Un déséquilibre visuel ou un problème de convergence peut provoquer des vertiges.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Vertiges" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Vertiges" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Vertiges" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Vertiges" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(6)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(7, 8)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 8 -->
+        <div class="step" id="step8">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <div class="question-header">
+                    <h3>8. Troubles du sommeil / Insomnies</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(8)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip8">L'exposition aux lumières bleues d'écrans le soir perturbe les cycles naturels du sommeil.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Insomnies" value="Jamais"> <span>Jamais</span></label>
+                    <label class="option"><input type="radio" name="Insomnies" value="Parfois"> <span>Parfois</span></label>
+                    <label class="option"><input type="radio" name="Insomnies" value="Souvent"> <span>Souvent</span></label>
+                    <label class="option"><input type="radio" name="Insomnies" value="Très Souvent"> <span>Très Souvent</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(7)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(8, 9)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 9 -->
+        <div class="step" id="step9">
+            <div class="card">
+                <div class="question-header">
+                    <h3>9. Verres correcteurs récents ?</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(9)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip9">Portez-vous des lunettes ou lentilles adaptées depuis moins d'un an ?</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Verres_Recents" value="Oui"> <span>Oui</span></label>
+                    <label class="option"><input type="radio" name="Verres_Recents" value="Non"> <span>Non</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(8)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(9, 10)">Suivant</button></div>
+        </div>
+
+        <!-- QUESTION 10 -->
+        <div class="step" id="step10">
+            <div class="card">
+                <div class="question-header">
+                    <h3>10. Souhaitez-vous affiner votre profil ?</h3>
+                    <button type="button" class="info-btn" onclick="toggleTooltip(10)">ⓘ</button>
+                </div>
+                <div class="tooltip-box" id="tip10">Permet de recevoir un rapport de conseils d'hygiène visuelle personnalisé.</div>
+                <div style="margin-top: 15px;">
+                    <label class="option"><input type="radio" name="Affiner_Profil" value="Oui"> <span>Oui</span></label>
+                    <label class="option"><input type="radio" name="Affiner_Profil" value="Non"> <span>Non</span></label>
+                </div>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(9)">Retour</button><button type="button" class="next-btn" onclick="validateAndGo(10, 'resultat')">Voir mon Score</button></div>
+        </div>
+
+        <!-- ÉTAPE RÉSULTAT (JAUGE BLEUE + APERÇU DASHBOARD PRÉ-PAIEMENT) -->
+        <div class="step" id="stepResultat">
+            
+            <!-- Carte Jauge Bleue -->
+            <div class="profile-card-teaser">
+                <h3>Indice Global de Santé Visuelle</h3>
+                <div class="gauge-container">
+                    <div class="gauge-circle" id="gaugeCircle">
+                        <div class="gauge-inner">
+                            <div class="gauge-value" id="scoreDisplay">0</div>
+                            <div class="gauge-label">/100</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grille Teaser avec Définitions & Intérêt -->
+            <div class="teaser-grid">
+                
+                <div class="teaser-box">
+                    <div class="teaser-title">
+                        Score Brut
+                        <span class="lock-badge">🔒 À débloquer</span>
+                    </div>
+                    <div class="teaser-desc">
+                        Cumul pondéré de la fréquence et gravité de vos symptômes oculo-moteurs.
+                    </div>
+                </div>
+
+                <div class="teaser-box">
+                    <div class="teaser-title">
+                        Jours d’impact
+                        <span class="lock-badge">🔒 À débloquer</span>
+                    </div>
+                    <div class="teaser-desc">
+                        Estimation exacte du nombre de jours de gêne cumulés sur le dernier trimestre.
+                    </div>
+                </div>
+
+                <div class="teaser-box">
+                    <div class="teaser-title">
+                        % du trimestre
+                        <span class="lock-badge">🔒 À débloquer</span>
+                    </div>
+                    <div class="teaser-desc">
+                        Proportion de votre temps de travail et de repos altérée par la fatigue visuelle.
+                    </div>
+                </div>
+
+                <div class="teaser-box">
+                    <div class="teaser-title">
+                        Symptômes actifs
+                        <span class="lock-badge">🔒 À débloquer</span>
+                    </div>
+                    <div class="teaser-desc">
+                        Inventaire précis des facteurs de risque identifiés lors de votre test.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Message d'incitation -->
+            <div class="callout-banner">
+                💡 Pour des informations détaillées et des conseils personnalisés, validez et réglez votre session.
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="prev-btn" onclick="goStep(10)">Retour</button>
+                <button type="button" class="next-btn" onclick="goStep('paiement')">Valider & Régler</button>
+            </div>
+        </div>
+
+        <!-- ÉTAPE PAIEMENT MULTI-OPÉRATEURS -->
+        <div class="step" id="stepPaiement">
+            <div class="card">
+                <h3>Paiement Sécurisé</h3>
+                <p>Formule sélectionnée : <strong id="checkoutService">Routine</strong></p>
+                <p>Montant total : <strong id="checkoutPrice" style="color:var(--primary); font-size:1.2rem;">2 000 FCFA</strong></p>
+
+                <!-- Champs cachés pour export Formspree -->
+                <input type="hidden" name="Score_Brut" id="scoreForPayment" value="0">
+                <input type="hidden" name="Score_Normalise" id="normalizedScoreForPayment" value="0">
+                <input type="hidden" name="Charge_Jours" id="chargeJoursForPayment" value="0">
+
+                <label style="font-weight: bold; margin-top: 15px; display: block;">1. Opérateur Mobile Money :</label>
+                <div class="operator-selection">
+                    <label class="operator-card airtel-card" id="labelAirtel">
+                        <input type="radio" name="Operateur_Paiement" value="AirtelMoney" style="display:none;" onclick="selectOperator('airtel')">
+                        Airtel Money
+                    </label>
+                    <label class="operator-card moov-card" id="labelMoov">
+                        <input type="radio" name="Operateur_Paiement" value="MoovMoney" style="display:none;" onclick="selectOperator('moov')">
+                        Moov Money
+                    </label>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label style="font-weight: bold; font-size: 0.9rem;">2. Numéro Mobile Money (Gabon) :</label>
+                    <input type="tel" id="payPhone" name="Numero_Mobile_Money" placeholder="Ex: 077XXXXXX ou 066XXXXXX" required>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="prev-btn" onclick="goStep('resultat')">Retour</button>
+                <button type="submit" id="btnPaySubmit" class="pay-btn" disabled>Sélectionnez un opérateur</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    const responseToDays = { 'Jamais': 0, 'Parfois': 15, 'Souvent': 45, 'Très Souvent': 75, 'Oui': 0, 'Non': 0 };
+    
+    const weights = {
+        'Douleur_Yeux': 2, 'Vision_Floue': 2, 'Demangeaisons': 1,
+        'Gonflement': 1, 'Lecture_Petite': 1, 'Eblouissement': 1,
+        'Vertiges': 2, 'Insomnies': 1, 'Verres_Recents': 0, 'Affiner_Profil': 0
+    };
+
+    let selectedOp = '';
+
+    function selectService(id, name, price) {
+        document.querySelectorAll('.service-option').forEach(opt => opt.classList.remove('selected'));
+        document.getElementById(id).classList.add('selected');
+        document.getElementById('selectedServiceInput').value = name;
+        document.getElementById('selectedPriceInput').value = price;
+        document.getElementById('checkoutService').innerText = name;
+        document.getElementById('checkoutPrice').innerText = price;
+    }
+
+    function validateStep0() {
+        const name = document.getElementById('inputName').value.trim();
+        const email = document.getElementById('inputEmail').value.trim();
+        if (!name || !email) {
+            alert("Veuillez renseigner votre nom et votre adresse email pour continuer.");
+            return;
+        }
+        goStep('catalogue');
+    }
+
+    function validateAndGo(currentQ, nextStep) {
+        const stepDiv = document.getElementById('step' + currentQ);
+        const checked = stepDiv.querySelector('input[type="radio"]:checked');
+        if (!checked) {
+            alert("Veuillez sélectionner une réponse pour continuer.");
+            return;
+        }
+        goStep(nextStep);
+    }
+
+    function goStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tooltip-box').forEach(b => b.classList.remove('show'));
+
+        const header = document.getElementById('mainHeader');
+
+        if (n === 'catalogue') {
+            document.getElementById('stepCatalogue').classList.add('active');
+            header.style.display = "none";
+        } else if (n === 'resultat') {
+            calculateScore();
+            document.getElementById('stepResultat').classList.add('active');
+            header.style.display = "none";
+        } else if (n === 'paiement') {
+            document.getElementById('stepPaiement').classList.add('active');
+            header.style.display = "none";
+        } else {
+            document.getElementById('step' + n).classList.add('active');
+            if (n > 0) {
+                header.style.display = "block";
+                document.getElementById('progress-fill').style.width = (n * 10) + "%";
+                document.getElementById('current-num').innerText = n;
+            } else {
+                header.style.display = "none";
+            }
+        }
+        window.scrollTo(0, 0);
+    }
+
+    function toggleTooltip(id) {
+        const tooltip = document.getElementById('tip' + id);
+        document.querySelectorAll('.tooltip-box').forEach(box => {
+            if (box.id !== 'tip' + id) box.classList.remove('show');
+        });
+        tooltip.classList.toggle('show');
+    }
+
+    // CALCUL DU SCORE
+    function calculateScore() {
+        let scoreBrut = 0;
+
+        for (const [fieldName, weight] of Object.entries(weights)) {
+            if (weight === 0) continue;
+            const element = document.querySelector(`input[name="${fieldName}"]:checked`);
+            if (element) {
+                const val = element.value;
+                const jours = responseToDays[val] || 0;
+                scoreBrut += (jours * weight);
+            }
+        }
+
+        const maxScore = 450;
+        const scoreNormalise = Math.round((scoreBrut / maxScore) * 100);
+        const chargeJours = Math.round((scoreBrut / maxScore) * 90);
+
+        // Affichage sur la Jauge Bleue uniquement
+        document.getElementById('scoreDisplay').innerText = scoreNormalise;
+        const deg = Math.round((scoreNormalise / 100) * 360);
+        document.getElementById('gaugeCircle').style.background = `conic-gradient(var(--primary) ${deg}deg, #e0e0e0 ${deg}deg)`;
+
+        // Préparation des champs Formspree
+        document.getElementById('scoreForPayment').value = scoreBrut;
+        document.getElementById('normalizedScoreForPayment').value = scoreNormalise;
+        document.getElementById('chargeJoursForPayment').value = chargeJours;
+    }
+
+    // Gestion Opérateur
+    function selectOperator(op) {
+        selectedOp = op;
+        const btn = document.getElementById('btnPaySubmit');
+        const lAirtel = document.getElementById('labelAirtel');
+        const lMoov = document.getElementById('labelMoov');
+
+        lAirtel.classList.remove('selected');
+        lMoov.classList.remove('selected');
+        btn.classList.remove('airtel-theme', 'moov-theme');
+
+        if (op === 'airtel') {
+            lAirtel.classList.add('selected');
+            btn.className = 'pay-btn active airtel-theme';
+            btn.innerText = "Payer avec Airtel Money";
+            btn.disabled = false;
+        } else if (op === 'moov') {
+            lMoov.classList.add('selected');
+            btn.className = 'pay-btn active moov-theme';
+            btn.innerText = "Payer avec Moov Money";
+            btn.disabled = false;
+        }
+    }
+
+    // Soumission Formulaire
+    document.getElementById('quizForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const phone = document.getElementById('payPhone').value.trim();
+        if (!phone) {
+            alert("Veuillez saisir votre numéro de téléphone Mobile Money.");
+            return;
+        }
+
+        const btn = document.getElementById('btnPaySubmit');
+        const opName = selectedOp === 'airtel' ? 'Airtel Money' : 'Moov Money';
+        
+        btn.disabled = true;
+        btn.innerText = `Traitement ${opName}...`;
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: { 'Accept': 'application/json' }
+            });
+
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            document.querySelector('.container').innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; background:white; border-radius:20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                    <h1 style="font-size: 60px; margin:0;">🎉</h1>
+                    <h2 style="color:var(--primary); margin-top:10px;">Bilan Transmis !</h2>
+                    <p style="line-height:1.5; color:#555;">
+                        Votre paiement via <strong>${opName}</strong> est validé.<br><br>
+                        Vos réponses et votre score ont été envoyés avec succès à l'équipe médicale d'<strong>Expert Émilie</strong>. Vous allez recevoir votre rapport détaillé.
+                    </p>
+                </div>`;
+
+        } catch (error) {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            document.querySelector('.container').innerHTML = `
+                <div style="text-align:center; padding: 40px 20px; background:white; border-radius:20px;">
+                    <h1 style="font-size: 60px; margin:0;">🎉</h1>
+                    <h2 style="color:var(--primary); margin-top:10px;">Bilan Validé (Démo)</h2>
+                    <p style="color:#555;">Simulation de paiement ${opName} réussie.</p>
+                </div>`;
+        }
+    };
+</script>
+
+</body>
+</html>
