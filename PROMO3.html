@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YENA EXPERT - Santé Visuelle Digitale</title>
+    <!-- Script Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvasconfetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #5856D6;
+            --bg: #F0F4F8;
+            --white: #ffffff;
+            --text: #2C3E50;
+            --airtel: #E31837;
+            --success: #27AE60;
+            --warning: #F39C12;
+            --danger: #E74C3C;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            color: var(--text);
+        }
+
+        .container { width: 100%; max-width: 450px; margin: 0 auto; }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            padding: 10px 0;
+            z-index: 100;
+            display: none;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #d1d9e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-align: right;
+        }
+
+        .time-notice {
+            background: #eef5ff;
+            border-left: 4px solid var(--secondary);
+            padding: 12px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .step { display: none; animation: slideUp 0.4s ease-out; }
+        .step.active { display: block; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h2 { color: var(--primary); margin-top: 0; text-align: center; }
+        h3 { margin-top: 0; line-height: 1.4; font-size: 1.2rem; color: var(--primary); }
+        p { line-height: 1.5; }
+
+        .promo-badge {
+            background: linear-gradient(135deg, #FF6B6B, #EE5253);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .price-box {
+            background: #FFF0F0;
+            border: 2px dashed var(--airtel);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .old-price { text-decoration: line-through; color: #888; font-size: 1rem; }
+        .new-price { color: var(--airtel); font-size: 1.8rem; font-weight: bold; }
+
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            cursor: pointer;
+            background: white;
+        }
+        input[type="radio"] { width: 22px; height: 22px; margin-right: 12px; }
+
+        .profile-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .gauge-container { position: relative; width: 140px; height: 140px; margin: 15px auto; }
+        .gauge-circle {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(var(--danger) 0deg, var(--warning) 120deg, var(--success) 240deg);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gauge-inner {
+            width: 120px; height: 120px; background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .gauge-value { font-size: 2rem; font-weight: bold; color: var(--text); }
+        .gauge-label { font-size: 0.7rem; color: #999; }
+
+        .category-badge {
+            display: inline-block; padding: 6px 16px; border-radius: 20px;
+            background: rgba(255,255,255,0.2); font-weight: bold; font-size: 0.9rem;
+        }
+
+        .locked-card {
+            position: relative; background: #fff; padding: 20px; border-radius: 20px;
+            border: 2px dashed #cbd5e1; text-align: center; overflow: hidden; margin-bottom: 20px;
+        }
+        .blur-content { filter: blur(4px); opacity: 0.4; pointer-events: none; }
+        .lock-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.88); padding: 15px;
+        }
+
+        .video-container {
+            position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+            border-radius: 12px; margin-top: 15px; background: #000;
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button {
+            flex: 1; padding: 18px; border: none; border-radius: 15px;
+            font-size: 1rem; font-weight: bold; cursor: pointer;
+        }
+        .next-btn { background: var(--primary); color: white; }
+        .prev-btn { background: #d1d9e0; color: #555; }
+        .airtel-btn { background: var(--airtel); color: white; width: 100%; }
+
+        .category-nulle { color: #27AE60; }
+        .category-moderee { color: #F39C12; }
+        .category-importante { color: #E67E22; }
+        .category-severe { color: #E74C3C; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header" id="mainHeader">
+        <div class="progress-text">Question <span id="current-num">1</span> / 10</div>
+        <div class="progress-bar-bg"><div id="progress-fill"></div></div>
+    </div>
+
+    <!-- FORMULAIRE PRINCIPAL (Formspree soumis automatiquement avant paiement) -->
+    <form id="quizForm" action="https://formspree.io/f/xeelgapy" method="POST">
+
+        <input type="hidden" name="Offre_Service" value="Démo Promo - Bilan Visuel Complet + Téléconseil">
+        <input type="hidden" name="Score_Brut" id="lead_ScoreBrut">
+        <input type="hidden" name="Score_Normalise" id="lead_ScoreNormalise">
+        <input type="hidden" name="Categorie" id="lead_Categorie">
+
+        <!-- ÉTAPE 0 : Accueil -->
+        <div class="step active" id="step0">
+            <div class="card" style="text-align: center;">
+                <span class="promo-badge">🔥 ATTENTION A VOS YEUX!!!Passez à la Santé Visuelle Digitale </span>
+                <h1 style="font-size: 2.2rem; margin: 10px 0 0 0; color: var(--primary);">👁️ YENA EXPERT</h1>
+               <p>Ecrans:clics,scrolling,saisies,chat,lumière bleue,lecture,souvent tard dans la nuit...</p>		<p>Environnement :poussières,fumées,vapeurs,polluants atmosphériques,éclairages dysfonctionnels..</p>
+<p>Ne négligez pas!</p>
+<p>La plateforme Santé digitale YENA EXPERT vous assiste </p>
+ <p>Évaluation gratuite votre SCORE de CHARGE VISUELLE en 10 questions simples.</p>
+<p>Ensuite,pour 3500 FCFA notre offre  1 PDF +  1 VidéoConseil avec l'expert (Dr Agaya) optimisera votre Santé visuelle et Globale!</p>
+
+                <div class="price-box">
+                    <span class="old-price">7 000 FCFA</span>
+                    <div class="new-price">3 500 FCFA</div>
+                    <div style="font-size:0.8rem; color: var(--success); font-weight: bold;"> PDF Analyse Personnalisée de la Charge + Vidéo Conseil</div>
+                </div>
+
+                <input type="text" id="userName" name="Nom_Utilisateur" placeholder="Votre Nom complet" required>
+                <input type="email" id="userEmail" name="_replyto" placeholder="Votre Adresse Email" required>
+            </div>
+            <button type="button" class="next-btn" onclick="goStep(1)">Passer en mode Santé Digitale /AUTOQUESTIONNAIRE Oeil & Santé</button>
+        </div>
+
+        <!-- QUESTIONS 1 À 10 -->
+        <div class="step" id="step1">
+            <div class="time-notice">Au cours des 3 derniers mois...</div>
+            <div class="card">
+                <h3>1. Douleur des Yeux</h3>
+                <label class="option"><input type="radio" name="Douleur_Yeux" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Douleur_Yeux" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Douleur_Yeux" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Douleur_Yeux" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(0)">Retour</button><button type="button" class="next-btn" onclick="goStep(2)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step2">
+            <div class="card">
+                <h3>2. Vision floue</h3>
+                <label class="option"><input type="radio" name="Vision_Floue" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Vision_Floue" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Vision_Floue" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Vision_Floue" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(1)">Retour</button><button type="button" class="next-btn" onclick="goStep(3)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step3">
+            <div class="card">
+                <h3>3. Démangeaisons oculaires</h3>
+                <label class="option"><input type="radio" name="Demangeaisons" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Demangeaisons" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Demangeaisons" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Demangeaisons" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(2)">Retour</button><button type="button" class="next-btn" onclick="goStep(4)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step4">
+            <div class="card">
+                <h3>4. Gonflement des paupières</h3>
+                <label class="option"><input type="radio" name="Gonflement" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Gonflement" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Gonflement" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Gonflement" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(3)">Retour</button><button type="button" class="next-btn" onclick="goStep(5)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step5">
+            <div class="card">
+                <h3>5. Difficultés à lire les petites écritures</h3>
+                <label class="option"><input type="radio" name="Lecture_Petite" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Lecture_Petite" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Lecture_Petite" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Lecture_Petite" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(4)">Retour</button><button type="button" class="next-btn" onclick="goStep(6)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step6">
+            <div class="card">
+                <h3>6. Gêne par éblouissement au soleil</h3>
+                <label class="option"><input type="radio" name="Eblouissement" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Eblouissement" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Eblouissement" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Eblouissement" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(5)">Retour</button><button type="button" class="next-btn" onclick="goStep(7)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step7">
+            <div class="card">
+                <h3>7. Vertiges</h3>
+                <label class="option"><input type="radio" name="Vertiges" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Vertiges" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Vertiges" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Vertiges" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(6)">Retour</button><button type="button" class="next-btn" onclick="goStep(8)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step8">
+            <div class="card">
+                <h3>8. Insomnies</h3>
+                <label class="option"><input type="radio" name="Insomnies" value="Jamais" required> Jamais</label>
+                <label class="option"><input type="radio" name="Insomnies" value="Parfois"> Parfois</label>
+                <label class="option"><input type="radio" name="Insomnies" value="Souvent"> Souvent</label>
+                <label class="option"><input type="radio" name="Insomnies" value="Très Souvent"> Très Souvent</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(7)">Retour</button><button type="button" class="next-btn" onclick="goStep(9)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step9">
+            <div class="card">
+                <h3>9. Verres correcteurs récents ?</h3>
+                <label class="option"><input type="radio" name="Verres_Recents" value="Oui" required> Oui</label>
+                <label class="option"><input type="radio" name="Verres_Recents" value="Non"> Non</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(8)">Retour</button><button type="button" class="next-btn" onclick="goStep(10)">Suivant</button></div>
+        </div>
+
+        <div class="step" id="step10">
+            <div class="card">
+                <h3>10. Affiner votre profil digital ?</h3>
+                <label class="option"><input type="radio" name="Affiner_Profil" value="Oui" required> Oui</label>
+                <label class="option"><input type="radio" name="Affiner_Profil" value="Non"> Non</label>
+            </div>
+            <div class="btn-group"><button type="button" class="prev-btn" onclick="goStep(9)">Retour</button><button type="button" class="next-btn" id="calcBtn" onclick="processLeadAndShowResult()">Calculer mon Score</button></div>
+        </div>
+
+    </form>
+
+    <!-- ÉTAPE TEASER / RÉSULTAT GRATUIT -->
+    <div class="step" id="stepResultat">
+        <div class="card" style="text-align: center; margin-bottom: 10px;">
+            <h2 style="margin: 0;">📊 Votre Score Gratuit</h2>
+        </div>
+
+        <div class="profile-card">
+            <h3>Score de Charge Visuelle</h3>
+            <div class="gauge-container">
+                <div class="gauge-circle">
+                    <div class="gauge-inner">
+                        <div class="gauge-value" id="scoreDisplay">0</div>
+                        <div class="gauge-label">/100</div>
+                    </div>
+                </div>
+            </div>
+            <div class="category-badge" id="categoryBadge">...</div>
+        </div>
+
+        <!-- SECTION VERROUILLÉE -->
+        <div class="locked-card">
+            <div class="blur-content">
+                <h3>Détail complet des 8 symptômes</h3>
+                <p>• Impact journalier estimé sur la vue</p>
+                <p>• Téléchargement du Rapport PDF d'Expertise</p>
+                <p>• Accès immédiat à la Vidéo-Conseil exclusive</p>
+            </div>
+            <div class="lock-overlay">
+                <div style="font-size: 2rem;">🔒</div>
+                <strong style="color: var(--primary);">Bilan Complet & Contenus Verrouillés</strong>
+                <p style="font-size: 0.85rem; color: #666; margin: 5px 0;">Débloquez l'analyse, le PDF et la Vidéo Conseil pour 3 500 FCFA.</p>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="prev-btn" onclick="goStep(10)">Refaire</button>
+            <button type="button" class="next-btn" style="background: var(--airtel);" onclick="goStep('paiement')">Débloquer (3 500 FCFA)</button>
+        </div>
+    </div>
+
+    <!-- ÉTAPE PAIEMENT -->
+    <div class="step" id="stepPaiement">
+        <div class="card">
+            <h3 style="text-align:center;">Paiement Airtel Money Gabon</h3>
+            <div style="text-align:center; margin-bottom: 15px;">
+                <span style="font-size:0.9rem; color:#555;">Tarif unique :</span>
+                <div style="font-size: 2rem; font-weight: bold; color: var(--airtel);">3 500 FCFA</div>
+            </div>
+
+            <div style="background: #FFF8E7; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px;">
+                1. Effectuez le transfert vers : <strong>077 49 20 28</strong><br>
+                2. Saisissez vos détails ci-dessous pour débloquer immédiatement vos contenus.
+            </div>
+
+            <label style="font-weight: bold; font-size: 0.85rem;">Votre Numéro Airtel Money</label>
+            <input type="tel" id="payPhone" placeholder="Ex: 074XXXXXX">
+
+            <label style="font-weight: bold; font-size: 0.85rem; margin-top: 10px; display:block;">ID / Ref. Transaction SMS</label>
+            <input type="text" id="payTxn" placeholder="Ex: TXN12345678">
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="prev-btn" onclick="goStep('resultat')">Retour</button>
+            <button type="button" class="airtel-btn" onclick="validatePaymentAndUnlock()">Valider le Paiement</button>
+        </div>
+    </div>
+
+    <!-- ÉTAPE DÉBLOCAGE COMPLET (Affichée uniquement APRÈS paiement) -->
+    <div class="step" id="stepUnlocking">
+        <div class="card" style="text-align:center;">
+            <h1 style="font-size: 40px; margin:0;">🎉</h1>
+            <h2 style="color:var(--success);">Accès Débloqué !</h2>
+            <p style="font-size:0.9rem;">Merci pour votre paiement. Voici l'intégralité de vos ressources et votre bilan personnalisé.</p>
+        </div>
+
+        <div class="card">
+            <h3>📄 Votre Rapport PDF Complet</h3>
+            <p style="font-size:0.9rem;">Votre rapport complet contenant l'analyse croisée des 8 symptômes a été généré.</p>
+            <a id="downloadPdfBtn" href="#" target="_blank" style="display:block; width:100%; text-align:center; background:var(--primary); color:white; padding:15px 0; border-radius:10px; text-decoration:none; font-weight:bold;">⏬ Télécharger mon Rapport PDF</a>
+        </div>
+
+        <div class="card">
+            <h3>🎥 Votre Vidéo-Conseil Exclusive</h3>
+            <p style="font-size:0.9rem;">Visionnez la session de conseils préparée par l'Expert Santé Visuelle :</p>
+            
+            <div class="video-container">
+                <!-- Remplacez SRC par le lien de votre vidéo YouTube / Vimeo / Drive -->
+                <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const responseToJays = { 'Jamais': 0, 'Parfois': 15, 'Souvent': 45, 'Très Souvent': 75, 'Oui': 0, 'Non': 0 };
+    const weights = { 'Douleur_Yeux': 2, 'Vision_Floue': 2, 'Demangeaisons': 1, 'Gonflement': 1, 'Lecture_Petite': 1, 'Eblouissement': 1, 'Vertiges': 2, 'Insomnies': 1 };
+
+    function goStep(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        const header = document.getElementById('mainHeader');
+
+        if (n === 'resultat') {
+            document.getElementById('stepResultat').classList.add('active');
+            header.style.display = "none";
+        } else if (n === 'paiement') {
+            document.getElementById('stepPaiement').classList.add('active');
+            header.style.display = "none";
+        } else if (n === 'unlocked') {
+            document.getElementById('stepUnlocking').classList.add('active');
+            header.style.display = "none";
+        } else {
+            document.getElementById('step' + n).classList.add('active');
+            if (n > 0) {
+                header.style.display = "block";
+                document.getElementById('progress-fill').style.width = (n * 10) + "%";
+                document.getElementById('current-num').innerText = n;
+            } else {
+                header.style.display = "none";
+            }
+        }
+        window.scrollTo(0, 0);
+    }
+
+    // 1. CAPTURE DES DONNÉES AVANT PAIEMENT (Lead Generation via Formspree)
+    async function processLeadAndShowResult() {
+        const name = document.getElementById('userName').value;
+        const email = document.getElementById('userEmail').value;
+
+        if (!name || !email) {
+            alert("Veuillez remplir votre Nom et Email à l'étape 1.");
+            goStep(0);
+            return;
+        }
+
+        // Calcul des scores
+        let scoreBrut = 0;
+        for (const [fieldName, weight] of Object.entries(weights)) {
+            const element = document.querySelector(`input[name="${fieldName}"]:checked`);
+            if (element) scoreBrut += (responseToJays[element.value] || 0) * weight;
+        }
+
+        const scoreNormalise = Math.round((scoreBrut / 450) * 100);
+        let category = scoreNormalise <= 20 ? '🟢 NULLE' : scoreNormalise <= 40 ? '🟡 MODÉRÉE' : scoreNormalise <= 70 ? '🟠 IMPORTANTE' : '🔴 SÉVÈRE';
+
+        // Mise à jour de l'UI Teaser
+        document.getElementById('scoreDisplay').innerText = scoreNormalise;
+        document.getElementById('categoryBadge').innerText = category;
+
+        // Préparation des champs Formspree
+        document.getElementById('lead_ScoreBrut').value = scoreBrut;
+        document.getElementById('lead_ScoreNormalise').value = scoreNormalise;
+        document.getElementById('lead_Categorie').value = category;
+
+        const btn = document.getElementById('calcBtn');
+        btn.innerText = "Envoi des données...";
+        btn.disabled = true;
+
+        // Soumission silencieuse à Formspree AVANT le paiement
+        try {
+            const form = document.getElementById('quizForm');
+            await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'Accept': 'application/json' }
+            });
+        } catch (e) {
+            console.log("Erreur lors de la capture du prospect, passage au résultat", e);
+        }
+
+        btn.innerText = "Calculer mon Score";
+        btn.disabled = false;
+        
+        // Navigation vers le résultat teaser
+        goStep('resultat');
+    }
+
+    // 2. DÉBLOCAGE COMPLET APRÈS PAIEMENT
+    function validatePaymentAndUnlock() {
+        const phone = document.getElementById('payPhone').value;
+        const txn = document.getElementById('payTxn').value;
+
+        if (!phone || !txn) {
+            alert("Veuillez renseigner votre numéro Airtel et l'ID de transaction SMS.");
+            return;
+        }
+
+        // Lancement des confettis de célébration
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+        // Génération / Lien dynamique vers le PDF (Lien exemple à remplacer par votre document PDF)
+        document.getElementById('downloadPdfBtn').href = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
+
+        // Déblocage de l'écran avec l'intégralité des données et de la vidéo
+        goStep('unlocked');
+    }
+</script>
+
+</body>
+</html>
